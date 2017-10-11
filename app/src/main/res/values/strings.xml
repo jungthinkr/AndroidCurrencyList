@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AndroidSample</string>
+
+    <string-array name="currency_picker">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>KRW</item>
+        <item>GBP</item>
+        <item>RUB</item>
+    </string-array>
+</resources>
