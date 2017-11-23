@@ -1,6 +1,10 @@
 package com.example.aliu.androidsample.CurrencyModule
 
+import android.content.Context
+
 interface CurrencyViewInterface {
-    fun handleRequestedData(currencies: ArrayList<Currency>, date: String, base: String, throwable: Throwable?)
+    fun handleRequestedData(throwable: Throwable?)
     fun emptyAdapter()
+    fun displayBaseList()
+    fun displayCurrencyCalculator(currency: Currency)
 }

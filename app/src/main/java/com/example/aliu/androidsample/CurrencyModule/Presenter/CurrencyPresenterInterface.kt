@@ -4,6 +4,8 @@ import android.content.Context
 
 interface CurrencyPresenterInterface {
     val context: Context
-    fun getCurrencies(baseCurrencyString: String)
-    fun displayCurrencyCalculator(currency: Currency)
+    var baseCurrency: String
+    var baseDate: String
+    var currencies: ArrayList<Currency>
+    fun getCurrencies(baseCurrencyString: String?)
 }

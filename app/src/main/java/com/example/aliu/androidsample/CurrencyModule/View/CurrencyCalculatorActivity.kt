@@ -2,11 +2,11 @@ package com.example.aliu.androidsample.CurrencyModule
 
 import android.R.attr.maxLength
 import android.os.Bundle
-import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.view.MenuItem
 import com.example.aliu.androidsample.R
 import kotlinx.android.synthetic.main.currency_calculator_activity.*
 
@@ -18,17 +18,22 @@ class CurrencyCalculatorActivity : AppCompatActivity() {
         setUpActionBar()
         handleIntentData()
         addFiltersToCurrencyText()
+        this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left)
     }
 
     private fun setUpActionBar() {
-        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        toolbar.navigationIcon = ResourcesCompat.getDrawable(resources, R.drawable.abc_ic_ab_back_material, null)
-        toolbar.setNavigationOnClickListener {
-            finish()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                this.overridePendingTransition(R.anim.anim_slide_out_right, R.anim.anim_slide_in_right)
+            }
         }
+        return super.onOptionsItemSelected(item)
     }
 
 
@@ -50,7 +55,6 @@ class CurrencyCalculatorActivity : AppCompatActivity() {
                     comparingCurrencyText.text = (value * changedText.toString().toDouble()).toString()
                 }
             }
-
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 

@@ -2,6 +2,9 @@ package com.example.aliu.androidsample.CurrencyModule
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import com.example.aliu.androidsample.CurrencyModule.View.CurrencyBaseSelectorActivity
 import com.example.aliu.androidsample.Storage.CurrencyRoomDatabase
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -13,9 +16,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class CurrencyPresenter : CurrencyPresenterInterface {
     var retrofit: Retrofit
+    override var currencies: ArrayList<Currency> = ArrayList()
     var currencyViewInterface: CurrencyViewInterface? = null
-    lateinit var baseCurrency: String
-    lateinit var baseDate: String
+    override lateinit var baseCurrency: String
+    override lateinit var baseDate: String
     override var context: Context
     var compositeDisposable = CompositeDisposable()
     private  val currencyRoomDatabase: CurrencyRoomDatabase?
@@ -30,45 +34,38 @@ class CurrencyPresenter : CurrencyPresenterInterface {
     }
 
 
-    override fun getCurrencies(baseCurrencyString: String) {
+     override fun getCurrencies(baseCurrencyString: String?) {
         currencyViewInterface?.emptyAdapter()
-        compositeDisposable.add(retrofit.create(CurrencyAPIInterface::class.java).getCurrencies(baseCurrencyString)
+         val base = baseCurrencyString ?: "USD"
+        compositeDisposable.add(retrofit.create(CurrencyAPIInterface::class.java).getCurrencies(base)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     currencyRoomDatabase?.currencyResponseBodyDAO()?.insertResponseBody(it)
                     baseCurrency = it.baseCurrency ?: ""
                     baseDate = it.date ?: ""
-                    val currencyList = getArrayListFromRates(it)
-                    currencyViewInterface?.handleRequestedData(currencyList, baseDate, baseCurrency, null)
+                    currencies = getArrayListFromRates(it)
+                    currencyViewInterface?.handleRequestedData(null)
 
                 }, { error ->
-                    val localResponseBody = currencyRoomDatabase?.currencyResponseBodyDAO()?.getResponseBody(baseCurrencyString)
+                    val localResponseBody = currencyRoomDatabase?.currencyResponseBodyDAO()?.getResponseBody(base)
                      localResponseBody?.let {
                         baseCurrency = localResponseBody.baseCurrency ?: ""
                         baseDate = localResponseBody.date ?: ""
-                        val currencyList = getArrayListFromRates(localResponseBody)
-                        currencyViewInterface?.handleRequestedData(currencyList, baseDate, baseCurrency, error)
+                        this.currencies = getArrayListFromRates(localResponseBody)
+                        currencyViewInterface?.handleRequestedData(error)
                     }
 
                 }, {
                     compositeDisposable.clear()
                 }))
 
-
     }
 
-    override fun displayCurrencyCalculator(currency: Currency) {
-        var intent = Intent(context, CurrencyCalculatorActivity::class.java)
-        intent.putExtra("comparingCurrency", currency.currencyType)
-        intent.putExtra("value", currency.value)
-        intent.putExtra("date", baseDate)
-        intent.putExtra("baseCurrency", baseCurrency)
-        context.startActivity(intent)
-    }
+
 
     private fun getArrayListFromRates(body: CurrencyResponseBody): ArrayList<Currency> {
-        var currencyList = ArrayList<Currency>()
+        val currencyList = ArrayList<Currency>()
         body.rates?.map {
             val currency = Currency(it.key , it.value as Double)
             currencyList.add(currency)
